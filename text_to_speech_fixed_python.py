@@ -37,5 +37,6 @@ with open('output.mp3', 'wb') as out:
     out.write(response.audio_content)
     print('Audio content written to file "output.mp3"')
 playsound('output.mp3')
+os.remove("output.mp3")
 
 
