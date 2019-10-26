@@ -3,6 +3,7 @@ from __future__ import division
 
 import re
 import sys
+import os
 
 from google.cloud import speech
 from google.cloud.speech import enums
@@ -83,7 +84,7 @@ class MicrophoneStream(object):
             yield b''.join(data)
 
 
-def listen_print_loop(responses):
+def listen_print_loop(responses, goal_words):
     """Iterates through server responses and prints them.
 
     The responses passed is a generator that will block until a response
@@ -128,22 +129,27 @@ def listen_print_loop(responses):
 
         else:
             print(transcript + overwrite_chars)
+            if goal_words in transcript:
+                print("Correct")
+                return True
 
             # Exit recognition if any of the transcribed phrases could be
             # one of our keywords.
-            if re.search(r'\b(exit|quit)\b', transcript, re.I):
+            if re.search(r'\b(quit)\b', transcript, re.I):
                 print('Exiting..')
-                break
+                return False
 
             num_chars_printed = 0
 
 
-def main():
+def run_mic(goal_words):
     # See http://g.co/cloud/speech/docs/languages
     # for a list of supported languages.
     language_code = 'en-US'  # a BCP-47 language tag
 
-    credentials = service_account.Credentials.from_service_account_file('/Users/kevincua/Downloads/calhacks-2019-17130d6c3f6f.json')
+    file_name = os.path.join(os.path.dirname(__file__), 'calhacks-2019-f94792042bb7.json')
+
+    credentials = service_account.Credentials.from_service_account_file(file_name)
     client = speech.SpeechClient(credentials=credentials)
     config = types.RecognitionConfig(
         encoding=enums.RecognitionConfig.AudioEncoding.LINEAR16,
@@ -161,10 +167,11 @@ def main():
         responses = client.streaming_recognize(streaming_config, requests)
 
         # Now, put the transcription responses to use.
-        listen_print_loop(responses)
+        listen_print_loop(responses, goal_words)
 
 
 if __name__ == '__main__':
-    main()
+    goal_words = "anathema to me"
+    run_mic(goal_words)
 
 
