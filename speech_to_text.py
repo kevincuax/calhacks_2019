@@ -131,13 +131,17 @@ def listen_print_loop(responses, goal_words):
             print(transcript + overwrite_chars)
             if goal_words in transcript:
                 print("Correct")
-                return True
+                return "Correct"
 
             # Exit recognition if any of the transcribed phrases could be
             # one of our keywords.
             if re.search(r'\b(quit)\b', transcript, re.I):
                 print('Exiting..')
-                return False
+                return "Quit"
+
+            if re.search(r'\b(give up)\b', transcript, re.I):
+                print('Next Question:')
+                return "Give up"
 
             num_chars_printed = 0
 
@@ -170,8 +174,5 @@ def run_mic(goal_words):
         listen_print_loop(responses, goal_words)
 
 
-if __name__ == '__main__':
-    goal_words = "anathema to me"
-    run_mic(goal_words)
 
 
